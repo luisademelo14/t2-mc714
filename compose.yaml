@@ -1,0 +1,116 @@
+# Serviços do detector de falhas por heartbeat.
+# Se já existe um compose.yaml na raiz do repositório, copie estes serviços para ele.
+#
+# Subir N nós (ex.: 5):
+#   N=5 RUN_ID=teste docker compose --profile heartbeat up -d --build node1 node2 node3 node4 node5
+# Parâmetros opcionais: T_MS (padrão 250), K (padrão 3),
+#   LOSS (probabilidade de perda de cada heartbeat, padrão 0) e SEED (semente da perda, padrão 0)
+# Logs em ./heartbeat/logs/<RUN_ID>/node<id>.jsonl
+#
+# Serviços do algoritmo Bully (perfil "bully", serviços bully1..bully9).
+# O nó i publica a porta <PORT_PREFIX>i no host (padrão 800i), usada pelos testes e pelo experimento.
+# Parâmetros opcionais: T_OK_MS (300), T_COORD_MS (1000), PING_MS (200),
+#   AUTO_START (1: eleição no boot), START_WAIT_MS (3000: espera máxima pelos pares antes da eleição
+#   de boot) e MONITOR (1: seguidores monitoram o líder por ping)
+# Demo: ./bully/demo.sh
+# Logs em ./logs/bully/<RUN_ID>/node<id>.jsonl (append; "inc" distingue cada boot do nó).
+# Com LOG_GROUP definido, todas as execuções escrevem em ./logs/bully/<LOG_GROUP>/ e o campo
+# "run_id" de cada linha separa as execuções (usado pelo experimento.py).
+
+x-heartbeat: &heartbeat
+  build: ./heartbeat
+  profiles: ["heartbeat"]
+  volumes:
+    - ./heartbeat/logs/${RUN_ID:-run}:/logs
+
+x-env: &env
+  N: ${N:-5}
+  T_MS: ${T_MS:-250}
+  K: ${K:-3}
+  LOSS: ${LOSS:-0}
+  SEED: ${SEED:-0}
+  RUN_ID: ${RUN_ID:-run}
+
+x-bully: &bully
+  build: ./bully
+  profiles: ["bully"]
+  volumes:
+    - ./logs/bully/${LOG_GROUP:-${RUN_ID:-run}}:/logs
+
+x-bully-env: &bully-env
+  N: ${N:-5}
+  T_OK_MS: ${T_OK_MS:-300}
+  T_COORD_MS: ${T_COORD_MS:-1000}
+  PING_MS: ${PING_MS:-200}
+  AUTO_START: ${AUTO_START:-1}
+  START_WAIT_MS: ${START_WAIT_MS:-3000}
+  MONITOR: ${MONITOR:-1}
+  PEER_URL: "http://bully{id}:8000"
+  RUN_ID: ${RUN_ID:-run}
+  LOG_DIR: /logs
+
+services:
+  node1:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 1}
+  node2:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 2}
+  node3:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 3}
+  node4:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 4}
+  node5:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 5}
+  node6:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 6}
+  node7:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 7}
+  node8:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 8}
+  node9:
+    <<: *heartbeat
+    environment: {<<: *env, NODE_ID: 9}
+
+  bully1:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}1:8000"]
+    environment: {<<: *bully-env, NODE_ID: 1}
+  bully2:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}2:8000"]
+    environment: {<<: *bully-env, NODE_ID: 2}
+  bully3:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}3:8000"]
+    environment: {<<: *bully-env, NODE_ID: 3}
+  bully4:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}4:8000"]
+    environment: {<<: *bully-env, NODE_ID: 4}
+  bully5:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}5:8000"]
+    environment: {<<: *bully-env, NODE_ID: 5}
+  bully6:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}6:8000"]
+    environment: {<<: *bully-env, NODE_ID: 6}
+  bully7:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}7:8000"]
+    environment: {<<: *bully-env, NODE_ID: 7}
+  bully8:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}8:8000"]
+    environment: {<<: *bully-env, NODE_ID: 8}
+  bully9:
+    <<: *bully
+    ports: ["${PORT_PREFIX:-800}9:8000"]
+    environment: {<<: *bully-env, NODE_ID: 9}
