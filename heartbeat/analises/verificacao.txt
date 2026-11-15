@@ -1,0 +1,36 @@
+Verificação da análise heartbeat — rodada com --reps 8
+
+Integridade conferida:
+- 40 execuções, 200 arquivos JSONL, 160 pares (execução, observador).
+- 5 configurações, 8 repetições por configuração; sementes 1 a 8.
+- N=5, K=3, vítima=node3, observadores=1,2,4,5.
+- Um start por nó e configuração consistente nos 5 starts de cada execução.
+- Ambos os CSVs coincidem com a reextração em memória dos logs exp_*.
+- Nenhuma detecção ausente e nenhum observador já suspeitando da vítima na morte estimada.
+
+Métricas complementares (perda_obs é média das proporções por execução):
+T=100 ms, perda=0%: detecção min–max=299–310 ms; FP total=0; perda observada=0.000%; envios teóricos=200/s; desvio da média medida=+0.006%; janela normal=14.72–14.78 s.
+T=250 ms, perda=0%: detecção min–max=750–775 ms; FP total=0; perda observada=0.000%; envios teóricos=80/s; desvio da média medida=-0.062%; janela normal=14.53–14.72 s.
+T=250 ms, perda=10%: detecção min–max=502–774 ms; FP total=15; perda observada=10.275%; envios teóricos=80/s; desvio da média medida=-0.062%; janela normal=14.66–14.75 s.
+T=250 ms, perda=30%: detecção min–max=249–774 ms; FP total=231; perda observada=29.800%; envios teóricos=80/s; desvio da média medida=-0.078%; janela normal=14.56–14.78 s.
+T=500 ms, perda=0%: detecção min–max=1499–1551 ms; FP total=0; perda observada=0.000%; envios teóricos=40/s; desvio da média medida=-0.313%; janela normal=14.39–14.77 s.
+
+Definições e limites:
+- Detecção: primeiro suspect da vítima após seu último hb_sent. Esse último envio é uma aproximação da morte; o instante exato do kill não foi registrado.
+- K*T é o limite de silêncio do detector. Com perdas antes da morte, parte desse silêncio já transcorreu e a detecção medida pode ser menor que K*T.
+- FP: eventos suspect de nós vivos após o aquecimento. FP/min usa a janela do fim do aquecimento até o último evento, incluindo o período posterior à falha.
+- FP/min no resumo é média das taxas por execução, não uma porcentagem de observadores nem de mensagens.
+- Envios/s são tentativas, incluindo descartes simulados; janela normal anterior à morte, com todos os nós vivos.
+- Média de detecção e percentis agrupam os 4 observadores das 8 repetições (32 observações por configuração). Observadores de uma mesma execução compartilham condições.
+- p95/p99 usam a interpolação linear padrão do pandas. Com 32 observações, p99 fica próximo ao máximo; não representa uma estimativa precisa da cauda.
+- Desvios padrão no resumo e gráficos são amostrais (ddof=1), não intervalos de confiança.
+- Os nós rodam em contêineres na mesma máquina, compartilhando recursos e domínio de falha.
+- Os PDFs do enunciado e do plano citados no handoff não estavam presentes neste checkout; a conformidade com eles não foi verificada.
+- O ambiente original da execução não foi registrado nestes CSVs/logs; o ambiente desta análise não permite deduzir hardware ou versões daquela execução.
+
+Reprodução da análise na raiz do projeto:
+python3 heartbeat/analise.py heartbeat/analises_reps8
+
+SHA-256 dos CSVs de entrada (cópias idênticas aos originais):
+execucoes.csv: 763f23ee66b3b837842a1ca24b71d18abea6c6c6b51498b57b9efd68a750222d
+deteccoes.csv: c8181ffd1c48126b8faa9b4672ca42751204c97b225d0546a1eca77ed9ede242

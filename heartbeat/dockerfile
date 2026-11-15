@@ -1,0 +1,4 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY detector.py node.py ./
+CMD ["python", "-u", "node.py"]

@@ -1,0 +1,6 @@
+logs/
+tests/
+resultados/
+analises_reps8/
+__pycache__/
+*.pyc
