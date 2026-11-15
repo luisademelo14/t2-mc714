@@ -29,7 +29,7 @@ Definições e limites:
 - O ambiente original da execução não foi registrado nestes CSVs/logs; o ambiente desta análise não permite deduzir hardware ou versões daquela execução.
 
 Reprodução da análise na raiz do projeto:
-python3 heartbeat/analise.py heartbeat/analises_reps8
+python3 heartbeat/analise.py
 
 SHA-256 dos CSVs de entrada (cópias idênticas aos originais):
 execucoes.csv: 763f23ee66b3b837842a1ca24b71d18abea6c6c6b51498b57b9efd68a750222d
